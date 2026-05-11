@@ -5,7 +5,7 @@ categories: [Writeups, HackMyVm]
 tags: [web, api, docker, sudo-Misconfiguration]
 ---
 
-En esta publicación se relatará cómo se resolvió la máquina CooLPg de la plataforma HackMyVM, una máquina orientada a la enumeración web, el abuso de una inyección SQL ciega para extraer credenciales y la escalada de privilegios a travez de un binario con permisos de ejecución como sudo.
+En esta publicación se relatará cómo se resolvió la máquina CooLPg de la plataforma HackMyVM, una máquina orientada a la enumeración web, el abuso de una inyección SQL ciega para extraer credenciales y la escalada de privilegios a travez de un script con permisos de ejecución como sudo.
 
 ### Información General
 - **IP:** 192.168.0.169
@@ -15,13 +15,6 @@ En esta publicación se relatará cómo se resolvió la máquina CooLPg de la pl
 
 ---
 
-##### Notas
--
----
-
-# Writeup
-
----
 
 ## Hosts discovery (descubrimiento de hosts)
 
