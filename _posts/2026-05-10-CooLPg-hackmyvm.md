@@ -2,7 +2,7 @@
 title: "CooLPg HackMyVm - Writeup"
 date: 2026-05-10 12:00:00 -0400
 categories: [Writeups, HackMyVm]
-tags: [web, api, docker, sudo-Misconfiguration]
+tags: [web, SQLinjection, sudo-Misconfiguration]
 ---
 
 En esta publicación se relatará cómo se resolvió la máquina CooLPg de la plataforma HackMyVM, una máquina orientada a la enumeración web, el abuso de una inyección SQL ciega para extraer credenciales y la escalada de privilegios a travez de un script con permisos de ejecución como sudo.
