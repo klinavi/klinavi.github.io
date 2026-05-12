@@ -8,8 +8,8 @@ image:
   alt: "Buffer Overflow Banner"
 ---
 
-la vulnerabilidad **Buffer overflow**, una vulnerabilidad que no es nueva en la industria 
-de la informática, esta tuvo sus primeras apariciones en los años 80s haciéndose presentes 
+La vulnerabilidad **Buffer Overflow** no es nueva en la industria 
+de la informática; tuvo sus primeras apariciones en los años 80 haciéndose presentes 
 principalmente en lenguajes de programación como `C`, donde el programador tiene control 
 total sobre la memoria pero también toda la responsabilidad de manejarla correctamente, 
 algo que no siempre ocurría.
@@ -71,7 +71,7 @@ Cabe mencionar que cada caso es distinto, por lo que a lo largo del artículo
 utilizaremos **Python 3** para construir los scripts necesarios de forma personalizada 
 según el comportamiento del binario.
 
-El código que estaremos usando para la fase de fuzzing sera el siguiente:
+El código que estaremos usando para la fase de fuzzing será el siguiente:
 
 ```python
 #!/usr/bin/python3
@@ -137,11 +137,11 @@ Al ejecutar el script y esperar a que finalice podemos ver la siguiente salida:
 [!] Posible crash en tamaño: 400
 ```
 
-Al ver **Inmunity Debugger** para ver el reporte del crash podemos ver lo siguiente:
+Al revisar **Immunity Debugger** para ver el reporte del crash podemos ver lo siguiente:
 
 ![Reporte del crash en Inmunity Debugger](/assets/img/BOF-guia-practica/1.png)
 
-Lo que ocurre en este momento, que no solo se sucede el crash sino que se llega a sobrescribir el registro **EIP** (*Extended Instruction 
+Lo que ocurre en este momento es que no solo se produce el crash, sino que también se llega a sobrescribir el registro **EIP** (*Extended Instruction 
 Pointer*), que es el registro encargado de indicarle al procesador cuál es la siguiente 
 instrucción a ejecutar. Controlar el EIP significa controlar el flujo de ejecución del 
 programa, y eso es precisamente lo que convierte un simple crash en una vulnerabilidad 
@@ -149,10 +149,10 @@ explotable. Profundizaremos en esto más adelante.
 
 ### Determinar el offset
 
-Ahora que sabemos cual es el tamaño de entrada necesaria para provocar un crash hay que determinar el `offset`
-El **offset** (desplazamiento) en un _buffer overflow_ es la cantidad exacta de bytes necesarios para llenar el búfer y alcanzar un punto crítico en la memoria, lo que permite controlar el valor del `EIP` con precisión
+Ahora que sabemos cuál es el tamaño de entrada necesario para provocar un crash, hay que determinar el `offset`.
+El **offset** (desplazamiento) en un _buffer overflow_ es la cantidad exacta de bytes necesarios para llenar el búfer y alcanzar un punto crítico en la memoria, lo que permite controlar el valor del `EIP` con precisión.
 
-Para determinar el offset en este caso lo que haremos será generar una cadena en la que cada secuencia de 4 bytes es única, gracias a esto podemos a través del valor que arroje el `EIP` determinar el offset 
+Para determinar el offset en este caso, lo que haremos será generar una cadena en la que cada secuencia de 4 bytes es única; gracias a esto podemos, a través del valor que arroje el `EIP`, determinar el offset exacto.
 Para eso usaremos el siguiente comando para crear un ciclo de 400 bytes:
 
 ```bash
@@ -191,18 +191,18 @@ if __name__  == "__main__":
     exploit()
 ```
 
-Al ejecutar el código y efectuarse el crash del aplicativo podemos ver lo siguiente en el reporte del Inmunity Debugger:
+Al ejecutar el código y efectuarse el crash del aplicativo podemos ver lo siguiente en el reporte del Immunity Debugger:
 
 <img src="/assets/img/BOF-guia-practica/2.png" alt="offset stack" width="600"/>
 
-Si este cadena de bytes y se pasamos a `msf-pattern_offset` usando la **flag** `-q` con el siguiente formato `0x37684136` tendremos el offset
+Si esta cadena de bytes se la pasamos a `msf-pattern_offset` usando la **flag** `-q` con el siguiente formato `0x37684136`, tendremos el offset:
 
 ```bash
 ❯ msf-pattern_offset -q 0x37684136                                                                        
 [*] Exact match at offset 230
 ```
 
-En este caso el offset es 230, para comprobarlo solo hay que modificar las `Variables globales` de la siguiente forma 
+En este caso el offset es 230; para comprobarlo solo hay que modificar las `Variables globales` de la siguiente forma:
 
 ```python
 # Variables globales
@@ -219,10 +219,10 @@ Ya con esto podemos lanzar el script y ver que el `EIP` contiene las 4 B represe
 
 <img src="/assets/img/BOF-guia-practica/3.png" alt="offset stack" width="600"/>
 
-# Asignación de espacio para el shell code
+## Asignación de espacio para el shellcode
 
 Una vez encontrado el offset y sobrescrito el `EIP`, el siguiente paso es identificar **en qué parte de la memoria se están almacenando los caracteres adicionales luego del EIP**
-Para esto cargaremos junto al payload una serie de `C` representadas en bytes una cantidad de 500 veces, para al momento de ver la respuesta en el Inmunity Debugger buscar en donde se almacenan esas `C (43)`
+Para esto cargaremos junto al payload una serie de `C` representadas en bytes una cantidad de 500 veces, para, al momento de ver la respuesta en el Immunity Debugger, buscar dónde se almacenan esas `C (43)`.
 Para eso agregaremos lo siguiente a las variables globales:
 
 ```python
@@ -239,7 +239,7 @@ la pila, que en este caso son nuestras `C`s. Esto es importante porque más adel
 usaremos esa posición para redirigir la ejecución hacia nuestro shellcode mediante un 
 `JMP ESP` que indicaremos en el `EIP`.
 
-Para poder ejemplificar esto de una forma mas visual y amigable se genero el siguiente gráfico:
+Para poder ejemplificar esto de una forma más visual y amigable, se generó el siguiente gráfico:
 
 <img src="/assets/img/BOF-guia-practica/offset_buffer_overflow_stack.svg" alt="offset stack" width="800"/>
 
@@ -373,7 +373,7 @@ proceso usando:
 
 Esta búsqueda es más amplia y encuentra cualquier instrucción equivalente a `JMP ESP` 
 independientemente del módulo donde se encuentre. En este caso arrojó 27 direcciones 
-válidas, para este caso se estara usando la dirección `0x759f3cda`.
+válidas; para este caso se estará usando la dirección `0x759f3cda`.
 
 > Al elegir una dirección hay que verificar que no contenga ningún badchar, ya que esa 
 > dirección será escrita directamente en el `EIP` y cualquier byte problemático podría 
@@ -437,13 +437,13 @@ listos.
 
 ### Ejecución exitosa del shellcode
 
-Ya con todo lo anterior configurado solo queda ponernos en modo escucha por el puerto definido al generar el shell code, y ejecutar el exploit para comprobar si somos capaces de explotar este Buffer Overflow.
+Ya con todo lo anterior configurado, solo queda ponernos en modo escucha por el puerto definido al generar el shellcode, y ejecutar el exploit para comprobar si somos capaces de explotar este Buffer Overflow.
 
-Al momento de ejecutarlo vemos que recibimos la consola CMD de windows.
+Al momento de ejecutarlo vemos que recibimos la consola CMD de Windows.
 
 ![](/assets/img/BOF-guia-practica/4.png)
 
-Si comprobamos la IP podemos ver que en efecto estamos dentro de la maquina.
+Si comprobamos la IP podemos ver que en efecto estamos dentro de la máquina.
 
 ![](/assets/img/BOF-guia-practica/5.png)
 
