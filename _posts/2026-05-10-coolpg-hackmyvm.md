@@ -3,18 +3,21 @@ title: "CooLPg HackMyVm - Writeup"
 date: 2026-05-10 12:00:00 -0400
 categories: [Writeups, HackMyVm]
 tags: [web, SQLinjection, sudo-Misconfiguration]
+image:
+  path: /assets/img/CooLPg-img/coolpg.png
+  alt: "CooLpg banner"
 ---
 
-En esta publicación se relatará cómo se resolvió la máquina CooLPg de la plataforma HackMyVM, una máquina orientada a la enumeración web, el abuso de una inyección SQL ciega para extraer credenciales y la escalada de privilegios a travez de un script con permisos de ejecución como sudo.
+En esta publicación se relatará cómo se resolvió la máquina CooLPg de la plataforma HackMyVM.
 
-### Información General
-- **IP:** 192.168.0.169
-- **Hostname:** coolpgi
-- **Sistema Operativo:**
-- **Kernel:** Linux
+| Autor | Dificultad | Sistema operativo | Plataforma | 
+|-------|------------|-------------------|------------|
+| cool | Fácil | Linux | HackMyVm |
+
+# Resumen ejecutivo
+La máquina **CooLPg** expone dos servicios: **SSH** y **HTTP** (nginx), siendo este último el punto de entrada. Al acceder al sitio se identifica un panel de login con un nombre de dominio asociado; tras añadirlo al `/etc/hosts` se descubren nuevas rutas mediante **fuzzing de directorios**, entre ellas un panel `/panel` con funcionalidad de búsqueda de usuarios. Aprovechando que el término buscado se refleja directamente en la URL, se realiza un ataque de enumeración con **`ffuf`** que revela dos usuarios válidos: `admin` y `cool`. Al no prosperar la fuerza bruta sobre el login, se analiza más detenidamente el panel de búsqueda, detectando que es vulnerable a una **SQL Injection blind boolean-based**. Mediante **`sqlmap`** se vuelca la base de datos y se obtienen credenciales SSH almacenadas en texto plano (`cool:ThisIsMyPGMyAdmin`), logrando así acceso inicial al sistema. Durante la post-explotación se identifica un script ejecutable como `root` sin contraseña vía `sudo`, cuya lógica consiste en buscar archivos `.log` dentro del directorio del usuario y, al encontrarlos, lanzar una **bash**; dado que el archivo `debug.log` ya existe en el directorio, ejecutar el script con `sudo` otorga directamente una shell como `root`. Por estas razones la máquina está catalogada con un nivel de dificultad **fácil**.
 
 ---
-
 
 ## Hosts discovery (descubrimiento de hosts)
 

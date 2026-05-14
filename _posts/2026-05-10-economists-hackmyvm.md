@@ -3,17 +3,20 @@ title: "Economists HackMyVm - Writeup"
 date: 2026-05-10 12:00:00 -0400
 categories: [Writeups, HackMyVm]
 tags: [web, bruteForce, stego, sudo-Misconfiguration]
+image:
+  path: /assets/img/Economists-img/economists.png
+  alt: "Buffer Overflow Banner"
 ---
 
 En este primera publicación se relatará cómo se resolvió la máquina [Economists](https://hackmyvm.eu/machines/machine.php?vm=Economists) de la plataforma HackMyVm.
 
-### Información General de la maquina
-- **IP:** 192.168.0.200
-- **Hostname:** elite-economists
-- **Sistema Operativo:** Ubuntu
-- **Kernel:** Linux
+| Autor | Dificultad | Sistema operativo | Plataforma | 
+|-------|------------|-------------------|------------|
+| eMVee | Fácil | Linux | HackMyVm |
 
----
+# Resumen ejecutivo
+La máquina **Economists** expone un servicio **FTP con acceso anónimo** que contiene varios archivos PDF cuyos metadatos, analizados con `exiftool`, revelan cuatro **nombres de usuario** del sistema: `joseph`, `richard`, `crystal` y `catherine`. En paralelo, el servicio **HTTP** (Apache 2.4.41) aloja un sitio web del que, mediante **scraping con CeWL**, se genera un diccionario de contraseñas personalizado basado en el contenido de la página. Combinando ambos insumos se realiza un **ataque de fuerza bruta con Hydra** contra el servicio SSH, obteniendo acceso inicial como el usuario `joseph` con la contraseña `wealthiest`. Durante la post-explotación se descubre en el directorio de `richard` un script `test.sh` que hace referencia al **CVE-2023-26604**, una vulnerabilidad de escalada de privilegios local que afecta a versiones de systemd anteriores a la 247; aunque el script arroja un falso negativo por un error de programación, la verificación manual confirma que la versión instalada es vulnerable. Dado que `joseph` tiene permiso para ejecutar `systemctl status` como `root` sin contraseña vía `sudo`, al invocar dicho comando se abre el paginador `less`, desde el cual se escapa a una **shell como root** escribiendo `!sh`. Por estas razones la máquina está catalogada con un nivel de dificultad **fácil**.
+
 
 ## Hosts discovery (descubrimiento de hosts)
 

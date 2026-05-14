@@ -3,23 +3,19 @@ title: "Flute HackMyVm - Writeup"
 date: 2026-05-10 12:00:00 -0400
 categories: [Writeups, HackMyVm]
 tags: [web, GraphQL, daemon-malicioso]
+image:
+  path: /assets/img/Flute-img/flute.png
+  alt: "Buffer Overflow Banner"
 ---
 
-En esta publicación se relatará cómo se resolvió la máquina Flute de la plataforma HackMyVM, una máquina que expone un servidor Apollo GraphQL desde donde se extraen credenciales mediante una query de introspección, y cuya escalada de privilegios se logra abusando de un daemon local que ejecuta comandos arbitrarios como root a través de un socket Unix.
+En esta publicación se relatará cómo se resolvió la máquina Flute de la plataforma HackMyVM.
 
-### Información General
-- **IP:** 192.168.0.165
-- **Hostname:** flute
-- **Sistema Operativo:** Alpine
-- **Kernel:** Linux
+| Autor | Dificultad | Sistema operativo | Plataforma | 
+|-------|------------|-------------------|------------|
+| sml | Fácil | Linux | HackMyVm |
 
----
-
-##### Notas
--
----
-
-# Writeup
+# Resumen ejecutivo
+La máquina Flute expone dos servicios: SSH en el puerto 22 y un Apollo Server (GraphQL) en el puerto 8888. Al identificar que por detrás corre GraphQL, se lanza una query de introspección para enumerar el esquema de la API, lo que revela la existencia de un tipo users con campos username y password. Con una query directa se vuelcan las credenciales de todos los usuarios en texto plano, entre ellas las de hamelin:comewithmerats, que permiten acceder al sistema vía SSH. Durante la post-explotación se identifican binarios SUID que requieren ser root para ejecutarse, por lo que se recurre a pspy para monitorear procesos, descubriendo un script Python ejecutándose con UID 0 que implementa un daemon local escuchando en el socket /tmp/ratd.sock; dicho daemon acepta comandos prefijados con RUN y los ejecuta directamente mediante os.system() sin ningún tipo de validación. Dado que el entorno estaba muy restringido y las reverse shells convencionales no funcionaban, se elaboró un script Python personalizado que establece la conexión inversa, el cual se invoca a través del daemon enviando RUN python3 /ruta/script.py, obteniendo finalmente una shell como root. Por estas razones la máquina está catalogada con un nivel de dificultad fácil.
 
 ---
 

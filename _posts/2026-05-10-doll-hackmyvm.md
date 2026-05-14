@@ -3,20 +3,19 @@ title: "Doll HackMyVm - Writeup"
 date: 2026-05-10 12:00:00 -0400
 categories: [Writeups, HackMyVm]
 tags: [web, api, docker, sudo-Misconfiguration]
+image:
+  path: /assets/img/HMV.png
+  alt: "Doll banner"
 ---
 
-En esta publicación se relatará cómo se resolvió la máquina Doll de la plataforma HackMyVM, una máquina que involucra la enumeración de un Docker Registry expuesto para extraer una imagen, encontrar credenciales en el historial de construcción del contenedor y escalar privilegios abusando de fzf con permisos sudo.
+En esta publicación se relatará cómo se resolvió la máquina Doll de la plataforma HackMyVM
 
-### Información General
-- **IP:** 192.168.0.112
-- **Hostname:** doll
-- **Sistema Operativo:**
-- **Kernel:** Linux
+| Autor | Dificultad | Sistema operativo | Plataforma | 
+|-------|------------|-------------------|------------|
+| sml | Fácil | Linux | HackMyVm |
 
----
-# Writeup
-
----
+# Resumen ejecutivo
+La máquina **Doll** expone dos servicios: **SSH** en el puerto 22 y un **Docker Registry** (API 2.0) en el puerto 1007. Interactuando con la API del registry mediante `curl` se identifican los repositorios disponibles y se descarga la imagen `dolly:latest` para inspeccionarla localmente. Dentro del contenedor se encuentra el directorio home del usuario `bela`, que contiene una clave privada SSH protegida con **passphrase**. Al intentar crackearla con `ssh2john` sin éxito, se recurre a revisar el **historial de construcción de la imagen** con `docker history`, donde se descubre la passphrase `devilcollectsit` expuesta como argumento de build (`ARG passwd=devilcollectsit`), lo que permite conectarse como `bela` vía SSH. Durante la post-explotación se comprueba con `sudo -l` que el usuario puede ejecutar **`fzf`** como `root` sin contraseña; aprovechando una funcionalidad documentada en GTFOBins, se inicia `fzf` en modo escucha (`--listen=1337`) con `sudo` y se le envía una petición `curl` con el comando `execute()`, lo que lanza un script de **reverse shell** prepreparado y otorga acceso como `root`. Por estas razones la máquina está catalogada con un nivel de dificultad **fácil**.
 
 ## Hosts discovery (descubrimiento de hosts)
 

@@ -3,19 +3,24 @@ title: "Arroutada - HackMyVm"
 date: 2026-03-06 23:00:00 -0400
 categories: [Writeups, HackMyVm]
 tags: [web, stego, fuzzing, hash, rce, portforwarding]
-img_path: /assets/img/arroutada-img/
+image:
+  path: /assets/img/Arroutada-img/Portada.png
+  alt: "Arroutada banner"
 ---
 
-En esta publicación se relatará cómo se resolvió la máquina Arroutada de la plataforma HackMyVM, una máquina que combina esteganografía, análisis de archivos ofuscados y múltiples instancias de RCE para obtener acceso, finalizando con una escalada de privilegios abusando de xargs con permisos sudo.
 
-### Información General
-- **IP:** `192.168.0.144`
-- **Hostname:** `arroutada`
----
- 
-## Writeup
- 
----
+
+En esta publicación se relatará cómo se resolvió la máquina Arroutada de la plataforma HackMyVM.
+
+| Autor | Dificultad | Sistema operativo | Plataforma | 
+|-------|------------|-------------------|------------|
+| Rijaba1 | Fácil | Linux | HackMyVm |
+
+
+## Resumen ejecutivo
+
+La máquina Arroutada expone únicamente un servicio HTTP cuya página principal contiene una imagen con datos ocultos mediante esteganografía, que junto al fuzzing de directorios revela un path con un segmento intermedio desconocido. Mediante ffuf se descubre dicho segmento, dando acceso a un directorio con archivos entre los que destaca uno camuflado como documento Office que en realidad es un ZIP cifrado. Se extrae su hash, se crackea con éxito y el contenido revela una webshell PHP con parámetros ocultos que permiten ejecución remota de código (RCE). Desde allí se obtiene una reverse shell y, enumerando el sistema, se descubre un servicio interno accesible solo localmente; se utiliza chisel para hacer port forwarding y acceder a él. El servicio expone un endpoint que ejecuta comandos arbitrarios vía petición POST en JSON, lo que permite pivotar al usuario drito. Finalmente, la escalada de privilegios es directa: el usuario puede ejecutar xargs como root sin contraseña mediante sudo, permitiendo lanzar una shell con privilegios totales. Por estas razones la máquina está catalogada con un nivel de dificultad fácil.
+
  
 ### Hosts Discovery (Descubrimiento de hosts)
  
@@ -58,7 +63,7 @@ Al entrar a la página encontramos solo una imagen, sin nada relevante en el có
 - Hacer **fuzzing** en busca de directorios
 ![](/assets/img/Arroutada-img/20260306232811.png)
  
-Al analizar la imagen encontramos un directorio:
+Al analizar la imagen encontramos el nombre de un directorio embebido en los metadatos:
  
 ![](/assets/img/Arroutada-img/20260306233229.png)
  
