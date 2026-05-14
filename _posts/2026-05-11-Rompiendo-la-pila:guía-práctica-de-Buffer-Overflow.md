@@ -3,6 +3,7 @@ title: "Rompiendo la pila: guía práctica de Buffer Overflow"
 date: 2026-05-11 8:00:00 -0400
 categories: [Artículos, Buffer Overflow]
 tags: [Buffer overflow, guías, articulo]
+pin: true
 image:
   path: /assets/img/BOF-guia-practica/banner.png
   alt: "Buffer Overflow Banner"
