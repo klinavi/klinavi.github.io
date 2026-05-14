@@ -3,6 +3,10 @@
 - type: github
   icon: "fab fa-github"
 
+- type: hackmyvm
+  icon: "fa fa-bug"  # no tiene icono propio, usa cualquier fa que te guste
+  url: "https://hackmyvm.eu/public/?u=klinavi"
+
 - type: twitter
   icon: "fa-brands fa-x-twitter"
 
@@ -13,6 +17,8 @@
 - type: rss
   icon: "fas fa-rss"
   noblank: true
+
+
 # Uncomment and complete the url below to enable more contact options
 #
 # - type: mastodon
